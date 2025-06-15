@@ -1,20 +1,27 @@
 <script>
   import { page } from "$app/stores";
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { socket } from "$lib/socket";
   import { PUBLIC_BACKEND_URL } from "$env/static/public";
 
   const presentationId = $page.params.id;
-  // キャッシュを無効化
   const pdfUrl = `${PUBLIC_BACKEND_URL}/public/presentations/${presentationId}.pdf?t=${Date.now()}`;
 
+  let mainElement;
   let canvasElement;
   let pdfDoc = null;
   let currentPage = 1;
   let isTerminated = false;
   let isLoading = true;
+  let isFullscreen = false;
+
+  function handleFullscreenChange() {
+    isFullscreen = !!document.fullscreenElement;
+  }
 
   onMount(() => {
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
     if (!socket.connected) {
@@ -40,7 +47,10 @@
     });
   });
 
-  // PDFを読み込み・ページを描画
+  onDestroy(() => {
+    document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  });
+
   function loadPdfAndRender(pageNum) {
     const loadingTask = pdfjsLib.getDocument(pdfUrl);
     loadingTask.promise
@@ -66,9 +76,17 @@
     canvasElement.width = viewport.width;
     await page.render({ canvasContext: context, viewport: viewport }).promise;
   }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      mainElement?.requestFullscreen?.();
+    } else {
+      document.exitFullscreen?.();
+    }
+  }
 </script>
 
-<main>
+<main bind:this={mainElement}>
   {#if isTerminated}
     <div class="message-container">
       <h2>プレゼンは終了しました</h2>
@@ -80,11 +98,49 @@
     </div>
   {:else}
     <canvas bind:this={canvasElement}></canvas>
+    <button
+      class="fullscreen-btn"
+      on:click={toggleFullscreen}
+      title="全画面表示切り替え"
+    >
+      {#if isFullscreen}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><path
+            d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"
+          /></svg
+        >
+      {:else}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><path
+            d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"
+          /></svg
+        >
+      {/if}
+    </button>
   {/if}
 </main>
 
 <style>
   main {
+    position: relative;
     width: 100vw;
     height: 100vh;
     margin: 0;
@@ -108,5 +164,25 @@
     padding: 2rem;
     background-color: rgba(0, 0, 0, 0.5);
     border-radius: 10px;
+  }
+  .fullscreen-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    opacity: 0.3;
+    transition: opacity 0.3s;
+  }
+  main:hover .fullscreen-btn {
+    opacity: 1;
   }
 </style>
