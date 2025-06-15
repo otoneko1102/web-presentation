@@ -151,7 +151,7 @@
             class="panel-header"
             on:click={() => (isSharePanelOpen = !isSharePanelOpen)}
           >
-            <strong>参加者情報</strong>
+            <strong>参加用URL/QRコード</strong>
             <div class="arrow" class:rotated={!isSharePanelOpen}>▼</div>
           </div>
           {#if isSharePanelOpen}
