@@ -148,11 +148,7 @@
     {:else if error}
       <p class="error-text">{error}</p>
     {:else}
-      <div class="preview-area">
-        <canvas bind:this={canvasElement}></canvas>
-      </div>
-
-      <div class="top-overlay-panel">
+      <div class="top-panel">
         <div class="collapsible-panel">
           <!-- svelte-ignore a11y_click_events_have_key_events -->
           <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -160,7 +156,7 @@
             class="panel-header"
             on:click={() => (isSharePanelOpen = !isSharePanelOpen)}
           >
-            <strong>参加用URL/QRコード</strong>
+            <strong>参加者情報</strong>
             <div class="arrow" class:rotated={!isSharePanelOpen}>▼</div>
           </div>
           {#if isSharePanelOpen}
@@ -184,18 +180,22 @@
             </div>
           {/if}
         </div>
+
+        <div class="controls">
+          <button
+            on:click={() => changePage(currentPage - 1)}
+            disabled={currentPage <= 1}>◀ 前へ</button
+          >
+          <span>{currentPage} / {pageCount}</span>
+          <button
+            on:click={() => changePage(currentPage + 1)}
+            disabled={currentPage >= pageCount}>次へ ▶</button
+          >
+        </div>
       </div>
 
-      <div class="controls-overlay">
-        <button
-          on:click={() => changePage(currentPage - 1)}
-          disabled={currentPage <= 1}>◀</button
-        >
-        <span>{currentPage} / {pageCount}</span>
-        <button
-          on:click={() => changePage(currentPage + 1)}
-          disabled={currentPage >= pageCount}>▶</button
-        >
+      <div class="preview-area">
+        <canvas bind:this={canvasElement}></canvas>
       </div>
     {/if}
   </main>
@@ -219,7 +219,6 @@
     align-items: center;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     flex-shrink: 0;
-    z-index: 20;
   }
   header h1 {
     font-size: 1.2rem;
@@ -231,11 +230,12 @@
   }
 
   .main-content {
-    position: relative;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
+    padding: 1rem;
+    gap: 1rem;
   }
   .loading-text,
   .error-text {
@@ -244,16 +244,19 @@
     text-align: center;
   }
 
+  .top-panel {
+    flex-shrink: 0;
+  }
+
   .preview-area {
     flex-grow: 1;
     min-height: 0;
-    background-color: #2c3e50;
+    background-color: #222;
+    border-radius: 8px;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 1rem;
-    width: 100%;
-    height: 100%;
   }
   .preview-area canvas {
     max-width: 100%;
@@ -263,24 +266,10 @@
     border-radius: 4px;
   }
 
-  .top-overlay-panel {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    right: 1rem;
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-  }
   .collapsible-panel {
-    background: rgba(52, 73, 94, 0.9);
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(5px);
+    background: #34495e;
     border-radius: 8px;
-    flex-shrink: 0;
-    width: 100%;
-    max-width: 450px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    margin-bottom: 1rem;
   }
   .panel-header {
     display: flex;
@@ -299,34 +288,14 @@
     padding: 0 1rem 1rem 1rem;
   }
 
-  .controls-overlay {
-    position: absolute;
-    bottom: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 0.3rem 0.5rem;
-    border-radius: 50px;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
-    font-size: 0.9rem;
-  }
-  .controls-overlay button {
-    background: transparent;
-    padding: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    font-size: 1.1rem;
+  .controls {
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  .controls-overlay button:hover {
-    background: rgba(255, 255, 255, 0.1);
+    gap: 1.5rem;
+    background: #34495e;
+    padding: 0.75rem;
+    border-radius: 8px;
   }
 
   button {
@@ -380,6 +349,7 @@
   .qr-btn:hover {
     background-color: #1abc9c;
   }
+
   .modal-overlay {
     position: fixed;
     top: 0;
