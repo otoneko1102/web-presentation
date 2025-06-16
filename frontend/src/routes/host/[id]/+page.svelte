@@ -28,20 +28,26 @@
       return;
     }
 
-    if (!socket.connected) socket.connect();
-
-    const fpPromise = FingerprintJS.load();
-    fpPromise
-      .then((fp) => fp.get())
-      .then((result) => {
-        const visitorId = result.visitorId;
-        socket.emit("join", {
-          room: presentationId,
-          isHost: true,
-          hostKey,
-          fingerprint: visitorId,
+    const joinRoom = () => {
+      const fpPromise = FingerprintJS.load();
+      fpPromise
+        .then((fp) => fp.get())
+        .then((result) => {
+          const visitorId = result.visitorId;
+          socket.emit("join", {
+            room: presentationId,
+            isHost: true,
+            hostKey,
+            fingerprint: visitorId,
+          });
         });
-      });
+    };
+
+    if (socket.connected) {
+      joinRoom();
+    }
+
+    socket.on("connect", joinRoom);
 
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js`;
 
@@ -65,8 +71,7 @@
     });
 
     socket.on("presentation_terminated", () => {
-      error =
-        "プレゼンテーションは終了、または無効になりました。ページをリロードしたか、長時間経過した可能性があります。";
+      error = "プレゼンテーションは終了、または無効になりました。";
       isLoading = false;
     });
   });

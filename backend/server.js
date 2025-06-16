@@ -146,12 +146,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    for (const id in presentations) {
-      if (presentations[id].hostSocketId === socket.id) {
-        cleanupPresentation(id);
-        break;
-      }
-    }
+    console.log(`User disconnected: ${socket.id}`);
   });
 });
 
