@@ -58,7 +58,7 @@
           required
         />
         <p class="file-name">
-          {selectedFile ? selectedFile.name : "ファイルが選択されていません"}
+          {selectedFile ? selectedFile.name : "ファイルを選択してください"}
         </p>
       </div>
       <button
