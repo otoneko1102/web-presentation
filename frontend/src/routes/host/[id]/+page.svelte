@@ -148,6 +148,10 @@
     {:else if error}
       <p class="error-text">{error}</p>
     {:else}
+      <div class="preview-area">
+        <canvas bind:this={canvasElement}></canvas>
+      </div>
+
       <div class="top-overlay-panel">
         <div class="collapsible-panel">
           <!-- svelte-ignore a11y_click_events_have_key_events -->
@@ -182,19 +186,16 @@
         </div>
       </div>
 
-      <div class="preview-area">
-        <canvas bind:this={canvasElement}></canvas>
-        <div class="controls-overlay">
-          <button
-            on:click={() => changePage(currentPage - 1)}
-            disabled={currentPage <= 1}>◀</button
-          >
-          <span>{currentPage} / {pageCount}</span>
-          <button
-            on:click={() => changePage(currentPage + 1)}
-            disabled={currentPage >= pageCount}>▶</button
-          >
-        </div>
+      <div class="controls-overlay">
+        <button
+          on:click={() => changePage(currentPage - 1)}
+          disabled={currentPage <= 1}>◀</button
+        >
+        <span>{currentPage} / {pageCount}</span>
+        <button
+          on:click={() => changePage(currentPage + 1)}
+          disabled={currentPage >= pageCount}>▶</button
+        >
       </div>
     {/if}
   </main>
@@ -218,6 +219,7 @@
     align-items: center;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     flex-shrink: 0;
+    z-index: 20;
   }
   header h1 {
     font-size: 1.2rem;
@@ -227,10 +229,10 @@
     padding: 0.4rem 0.8rem;
     font-size: 0.85rem;
   }
+
   .main-content {
     position: relative;
     flex-grow: 1;
-    padding: 0;
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -241,6 +243,26 @@
     padding: 2rem;
     text-align: center;
   }
+
+  .preview-area {
+    flex-grow: 1;
+    min-height: 0;
+    background-color: #2c3e50;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    width: 100%;
+    height: 100%;
+  }
+  .preview-area canvas {
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+    width: auto;
+    border-radius: 4px;
+  }
+
   .top-overlay-panel {
     position: absolute;
     top: 1rem;
@@ -276,28 +298,13 @@
   .panel-content {
     padding: 0 1rem 1rem 1rem;
   }
-  .preview-area {
-    position: relative;
-    flex-grow: 1;
-    min-height: 0;
-    background-color: #2c3e50;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-  }
-  .preview-area canvas {
-    max-width: 100%;
-    max-height: 100%;
-    height: auto;
-    width: auto;
-    border-radius: 4px;
-  }
+
   .controls-overlay {
     position: absolute;
     bottom: 1rem;
     left: 50%;
     transform: translateX(-50%);
+    z-index: 10;
     background-color: rgba(0, 0, 0, 0.6);
     padding: 0.3rem 0.5rem;
     border-radius: 50px;
@@ -305,12 +312,7 @@
     align-items: center;
     gap: 0.75rem;
     box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
-    opacity: 0.2;
-    transition: opacity 0.3s ease;
     font-size: 0.9rem;
-  }
-  .preview-area:hover .controls-overlay {
-    opacity: 1;
   }
   .controls-overlay button {
     background: transparent;
@@ -326,6 +328,7 @@
   .controls-overlay button:hover {
     background: rgba(255, 255, 255, 0.1);
   }
+
   button {
     background: #3498db;
     color: white;
@@ -347,6 +350,7 @@
   .terminate-btn:hover {
     background-color: #c0392b;
   }
+
   .url-input-container {
     display: flex;
     margin-bottom: 0.75rem;
