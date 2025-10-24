@@ -1,2 +1,5 @@
-public/presentations
-uploads
+dist/
+public/presentations/
+uploads/
+
+archives/
