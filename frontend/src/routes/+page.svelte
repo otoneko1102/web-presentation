@@ -83,6 +83,15 @@
 </div>
 
 <style>
+  :root {
+    margin: 0;
+    padding: 0;
+  }
+  :global(html),
+  :global(body) {
+    margin: 0;
+    padding: 0;
+  }
   .page-container {
     display: flex;
     justify-content: center;
@@ -91,6 +100,7 @@
     background-color: #2c3e50;
     font-family: sans-serif;
     padding: 2rem;
+    margin: 0;
   }
   .upload-card {
     background-color: #34495e;

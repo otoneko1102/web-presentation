@@ -164,6 +164,7 @@
     padding: 2rem;
     background-color: rgba(0, 0, 0, 0.5);
     border-radius: 10px;
+    margin: 0;
   }
   .fullscreen-btn {
     position: absolute;
