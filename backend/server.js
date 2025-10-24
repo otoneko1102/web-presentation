@@ -45,16 +45,39 @@ const cleanupPresentation = async (presentationId) => {
       console.error(`Failed to delete PDF for ${presentationId}:`, err.message);
     }
     io.to(presentationId).emit("presentation_terminated");
+    io.sockets.in(presentationId).disconnectSockets(true);
     delete presentations[presentationId];
   }
 };
 
-setInterval(() => {
+setInterval(async () => {
   const now = new Date();
+  const ONE_HOUR_IN_MS = 60 * 60 * 1000;
   const TWELVE_HOURS_IN_MS = 12 * 60 * 60 * 1000;
-  for (const id in presentations) {
-    if (now - presentations[id].createdAt > TWELVE_HOURS_IN_MS) {
-      cleanupPresentation(id);
+
+  console.log("Running hourly cleanup check...");
+
+  const presentationIds = Object.keys(presentations);
+
+  for (const id of presentationIds) {
+    const presentation = presentations[id];
+    if (!presentation) continue;
+
+    const createdAt = presentation.createdAt;
+    const age = now - createdAt;
+
+    if (age > TWELVE_HOURS_IN_MS) {
+      console.log(`Cleaning up presentation ${id} (older than 12 hours)`);
+      await cleanupPresentation(id);
+      continue;
+    }
+
+    const room = io.sockets.adapter.rooms.get(id);
+    const participantCount = room ? room.size : 0;
+
+    if (participantCount === 0 && age > ONE_HOUR_IN_MS) {
+      console.log(`Cleaning up presentation ${id} (empty for > 1 hour)`);
+      await cleanupPresentation(id);
     }
   }
 }, 60 * 60 * 1000);
@@ -147,6 +170,18 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`);
+
+    const presentationId = Object.keys(presentations).find(
+      (id) =>
+        presentations[id] && presentations[id].hostSocketId === socket.id
+    );
+
+    if (presentationId) {
+      console.log(
+        `Host disconnected from presentation: ${presentationId}. Cleaning up.`
+      );
+      cleanupPresentation(presentationId);
+    }
   });
 });
 
